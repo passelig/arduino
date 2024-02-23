@@ -1,8 +1,9 @@
 #include <util/atomic.h>  // For the ATOMIC_BLOCK macro
+#define minimumPWM 100
 
 const int FwdPin = 10;             //Forward Motor Pin
 const int BwdPin = 9;              //Backward Motor Pin
-const int acceptedDeviation = 10;  //Backward Motor Pin
+const int acceptedDeviation = 3;  //Backward Motor Pin
 int pwmSpeed = 255;
 int deviation = 0;
 
@@ -24,9 +25,6 @@ void setup() {
 }
 
 void loop() {
-  // Read the positiontion in an atomic block to avoid a potential
-  // misread if the interrupt coincides with this code running
-  // see: https://www.arduino.cc/reference/en/language/variables/variable-scope-qualifiers/volatile/
   currentMillis = millis();
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     position = interuptPosition;
@@ -36,11 +34,10 @@ void loop() {
     // Read the incoming integer
     setpoint = Serial.parseInt();
   }
-  if (currentMillis - previousMillis >= 10) {
-    if (deviation > 10) {
-      Serial.println(String(position) + " " + String(setpoint) + " " + String(pwmSpeed));
+  if (currentMillis - previousMillis >= 70) {
+    if (deviation > acceptedDeviation) {
+      Serial.println(String(position) + " " + String(deviation) + " " + String(pwmSpeed));
     }
-    // Save the current time for the next iteration
     previousMillis = currentMillis;
   }
   setForwardOrBackward();
@@ -53,7 +50,14 @@ void setForwardOrBackward() {
     analogWrite(FwdPin, 0);
     return;
   }
-  pwmSpeed = constrain(deviation, 150, 255);
+  
+  // Start regulating at 500 ticks from setpoint down to "minimumPWM"
+  if (deviation < 500){
+    pwmSpeed = minimumPWM +(125.0/500*deviation);
+  } else {
+    pwmSpeed = 255;
+  }
+ 
   if (position < setpoint) {
     analogWrite(FwdPin, pwmSpeed);  //Send instructions to Forward motor pin
     analogWrite(BwdPin, 0);
