@@ -1,8 +1,8 @@
 // Pin definitions
 const int encoderPinA = 2;    // Encoder pin A (interrupt pin)
 const int encoderPinB = 3;    // Encoder pin B
-const int motorPinA = 9;      // MX1508 IN1
-const int motorPinB = 10;     // MX1508 IN2
+const int motorPinA = 5;      // MX1508 IN1
+const int motorPinB = 6;     // MX1508 IN2
 const int desiredEncoderCount = 150;  // Desired Power in ticks per 100ms
 
 volatile long encoderCount = 0;   // Encoder count
