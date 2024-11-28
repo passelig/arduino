@@ -67,11 +67,11 @@ void loop() {
     analogWrite(motorPinB, 0); // Keep running motor in the same direction
 
     // Print values for Serial Plotter in CSV format
-    Serial.print("Avvik");
+    Serial.print("AvvikFraSpeed");
     Serial.print(":");
     Serial.print(error);
     Serial.print(" ");
-    Serial.print("encoderTeller");
+    Serial.print("Speed");
     Serial.print(":");
     Serial.print(encoderCount);
     Serial.print(" ");
