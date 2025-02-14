@@ -19,7 +19,7 @@ int currentSpeed = minSpeed;
 int speedStep = 1; // Speed increment per loop
 
 // State machine variables
-enum State { ACCELERATE_FORWARD, RUN_FORWARD, DECELERATE_FORWARD, STOP, ACCELERATE_BACKWARD, RUN_BACKWARD, DECELERATE_BACKWARD };
+enum State { ACCELERATE_FORWARD, RUN_FORWARD, DECELERATE_FORWARD, STOP_AFTER_FORWARD, STOP_AFTER_BACKWARD, ACCELERATE_BACKWARD, RUN_BACKWARD, DECELERATE_BACKWARD };
 State currentState = ACCELERATE_FORWARD;
 
 void setup() {
@@ -76,17 +76,27 @@ void loop() {
         analogWrite(IN2, 0);
 
         if (currentSpeed <= minSpeed) {
-          currentState = STOP;
+          currentState = STOP_AFTER_FORWARD;
           previousMillis = currentMillis;
         }
       }
       break;
 
-    case STOP:
+    case STOP_AFTER_FORWARD:
       analogWrite(IN1, 0);
       analogWrite(IN2, 0);
       if (currentMillis - previousMillis >= stopTime) {
         currentState = ACCELERATE_BACKWARD;
+        previousMillis = currentMillis;
+        currentSpeed = minSpeed;
+      }
+      break;
+
+    case STOP_AFTER_BACKWARD:
+      analogWrite(IN1, 0);
+      analogWrite(IN2, 0);
+      if (currentMillis - previousMillis >= stopTime) {
+        currentState = ACCELERATE_FORWARD;
         previousMillis = currentMillis;
         currentSpeed = minSpeed;
       }
@@ -121,7 +131,7 @@ void loop() {
         analogWrite(IN2, currentSpeed);
 
         if (currentSpeed <= minSpeed) {
-          currentState = STOP;
+          currentState = STOP_AFTER_BACKWARD;
           previousMillis = currentMillis;
         }
       }
